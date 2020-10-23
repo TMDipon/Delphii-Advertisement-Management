@@ -1,0 +1,286 @@
+--TABLE CREATION QUERIES
+
+CREATE TABLE SALARY
+(
+    SALARY_ID NUMBER,
+    SALARY_GRADE VARCHAR2(20) not null,
+    SALARY NUMBER not null,
+    constraint salary_pk PRIMARY KEY(SALARY_ID)
+);
+
+CREATE TABLE STAFF
+(
+    STAFF_ID NUMBER,
+    STAFF_NAME VARCHAR2(50) not null,
+    SALARY_ID NUMBER not null,
+    STAFF_ROLE VARCHAR2(40) not null,
+    CHARGE_OUT_RATE NUMBER not null,
+    TELEPHONE_NO VARCHAR2(30) not null,
+    FAX_NO VARCHAR2(30) not null,
+    EMAIL_ID VARCHAR2(40) not null,
+    constraint staff_pk PRIMARY KEY(STAFF_ID),
+    constraint staff_fk_1 FOREIGN KEY(SALARY_ID) references SALARY(SALARY_ID) on delete cascade
+);
+
+CREATE TABLE CLIENT
+(
+    CLIENT_ID NUMBER,
+    COMPANY_NAME VARCHAR2(40)not null,
+    ACC_MANAGER_ID NUMBER not null,
+    constraint client_pk PRIMARY KEY(CLIENT_ID),
+    constraint client_fk_1 FOREIGN KEY(ACC_MANAGER_ID) references STAFF(STAFF_ID) on delete cascade
+);
+
+CREATE TABLE CAMPAIGN
+(
+    CAMPAIGN_ID NUMBER,
+    CAMPAIGN_NAME VARCHAR2(50) not null,
+    CAMPAIGN_CODE VARCHAR2(15) not null unique,
+    CLIENT_ID NUMBER not null,
+    CAMPAIGN_PRODUCT VARCHAR2(40) not null,
+    START_DATE DATE,
+    END_DATE DATE,
+    constraint campaign_pk PRIMARY KEY(CAMPAIGN_ID),
+    constraint campaign_fk_1 FOREIGN KEY(CLIENT_ID) references CLIENT(CLIENT_ID) on delete cascade,
+    constraint campaign_date_check CHECK(END_DATE > START_DATE)
+);
+
+CREATE TABLE MEETING
+(
+    MEETING_ID NUMBER,
+    CAMPAIGN_ID NUMBER not null,
+    DATE_and_TIME TIMESTAMP not null,
+    DURATION VARCHAR2(20) not null,
+    PURPOSE VARCHAR2(300) not null,
+    LOCATION VARCHAR2(100) not null,
+    constraint meeting_pk PRIMARY KEY(MEETING_ID),
+    constraint meeting_fk_1 FOREIGN KEY(CAMPAIGN_ID) references CAMPAIGN(CAMPAIGN_ID) on delete cascade
+);
+
+CREATE TABLE STAFF_CAMPAIGN
+(
+    STAFF_CAMPAIGN_ID NUMBER,
+    STAFF_ID NUMBER not null,
+    CAMPAIGN_ID NUMBER not null,
+    constraint staff_campaign_pk PRIMARY KEY(STAFF_CAMPAIGN_ID),
+    constraint staff_campaign_fk_1 FOREIGN KEY(STAFF_ID) references STAFF(STAFF_ID) on delete cascade,
+    constraint staff_campaign_fk_2 FOREIGN KEY(CAMPAIGN_ID) references CAMPAIGN(CAMPAIGN_ID) on delete cascade,
+    constraint staff_campaign_unique UNIQUE(STAFF_ID, CAMPAIGN_ID)
+);
+
+CREATE TABLE STAFF_MEETING
+(
+    STAFF_MEETING_ID NUMBER,
+    STAFF_ID NUMBER not null,
+    MEETING_ID NUMBER not null,
+    constraint staff_meeting_pk PRIMARY KEY(STAFF_MEETING_ID),
+    constraint staff_meeting_fk_1 FOREIGN KEY(STAFF_ID) references STAFF(STAFF_ID) on delete cascade,
+    constraint staff_meeting_fk_2 FOREIGN KEY(MEETING_ID) references MEETING(MEETING_ID) on delete cascade,
+    constraint staff_meeting_unique UNIQUE(STAFF_ID, MEETING_ID)
+);
+
+CREATE TABLE ADVERT
+(
+    ADVERT_ID NUMBER,
+    ADVERT_CODE VARCHAR2(15) not null unique,
+    CAMPAIGN_ID NUMBER not null,
+    ADVERT_TYPE VARCHAR2(20) not null,
+    BRIEF_DESC VARCHAR2(400) not null,
+    AUDIENCE VARCHAR2(300) not null,
+    ADVERT_SIZE VARCHAR2(300) not null,
+    START_DATE DATE,
+    END_DATE DATE,
+    constraint advert_pk PRIMARY KEY(ADVERT_ID),
+    constraint advert_check_date CHECK(END_DATE > START_DATE),
+    constraint advert_fk_1 FOREIGN KEY(CAMPAIGN_ID) references CAMPAIGN(CAMPAIGN_ID) on delete cascade
+);
+
+CREATE TABLE COMPONENT
+(
+    COMPONENT_ID NUMBER,
+    ADVERT_ID NUMBER not null,
+    TYPE VARCHAR2(100) not null,
+    REQUIREMENTS VARCHAR2(250) not null,
+    STATUS VARCHAR2(100) not null,
+    START_DATE DATE,
+    END_DATE DATE,
+    constraint component_pk PRIMARY KEY(COMPONENT_ID),
+    constraint component_fk_1 FOREIGN KEY(ADVERT_ID) references ADVERT(ADVERT_ID) on delete cascade,
+    constraint component_date_check CHECK(END_DATE > START_DATE)
+);
+
+CREATE TABLE PLACEMENT
+(
+    PLACEMENT_ID NUMBER,
+    ADVERT_ID NUMBER not null,
+    ASSISTANT_ID NUMBER not null,
+    PLACEMENT_CODE VARCHAR2(30) not null,
+    PL_AGENCY_TYPE VARCHAR2(100) not null,
+    CONTACT_NAME VARCHAR2(100) not null,
+    CONTACT_PHONE VARCHAR2(50) not null,
+    PAGES_PER_EDITION NUMBER,
+    NUMBER_OF_EDITION NUMBER,
+    FREQUENCY VARCHAR2(100),
+    NUMBER_OF_LOCATIONS NUMBER,
+    NOTE VARCHAR2(300),
+    PLACEMENT_DATE DATE,
+    constraint placement_pk PRIMARY KEY(PLACEMENT_ID),
+    constraint placement_fk_1 FOREIGN KEY(ADVERT_ID) references ADVERT(ADVERT_ID) on delete cascade,
+    constraint placement_fk_2 FOREIGN KEY(ASSISTANT_ID) references STAFF(STAFF_ID) on delete cascade
+);
+
+
+--Data Manipulation starts  here
+
+--SALARY DATA
+INSERT INTO SALARY VALUES(1,'A',40000);
+INSERT INTO SALARY VALUES(2,'B',35000);
+INSERT INTO SALARY VALUES(3,'C',30000);
+INSERT INTO SALARY VALUES(4,'D',25000);
+INSERT INTO SALARY VALUES(5,'E',20000);
+INSERT INTO SALARY VALUES(6,'F',10000);
+INSERT INTO SALARY VALUES(7,'G',8000);
+INSERT INTO SALARY VALUES(8,'H',3000);
+
+--STAFF DATA
+INSERT INTO STAFF VALUES(1,'Cooper',1,'Campaign Manager',300,'02097654562','+440209876784','cooper@gmail.com');
+INSERT INTO STAFF VALUES(2,'Willey',1,'Campaign Manager',300,'02061653262','+440204176982','willey@gmail.com');
+INSERT INTO STAFF VALUES(3,'Denley',2,'Account Manager',100,'02051603372','+440203076711','denley@gmail.com');
+INSERT INTO STAFF VALUES(4,'Jason',3,'Account Manager',80,'02997153091','+440291286766','jason87@gmail.com');
+INSERT INTO STAFF VALUES(5,'Anderson',6,'Graphics Designer',180,'01219123367','+441215127843','andy@gmail.com');
+INSERT INTO STAFF VALUES(6,'Patrick',6,'Graphics Designer',180,'01315443599','+441312113269','patrick@gmail.com');
+INSERT INTO STAFF VALUES(7,'Elena',2,'Account Manager',150,'02054478961','+440203346690','elena@gmail.com');
+INSERT INTO STAFF VALUES(8,'Olivia',4,'Contact Person',170,'02011398766','+440201345561','olivia@gmail.com');
+INSERT INTO STAFF VALUES(9,'Morgan',4,'Contact Person',170,'02016690988','+440203218790','morgan@gmail.com');
+INSERT INTO STAFF VALUES(10,'Cummins',7,'Purchasing Assistant',100,'01144561127','+441140975521','cummins91@gmail.com');
+INSERT INTO STAFF VALUES(11,'Lauren',7,'Purchasing Assistant',100,'01417768123','+441413667124','lauren@gmail.com');
+INSERT INTO STAFF VALUES(12,'Emma',1,'Campaign Manager',300,'02077121198','+440201149033','emma@gmail.com');
+
+--CLIENT DATA
+INSERT INTO CLIENT VALUES(1,'Unilever',7);
+
+--CAMPAIGN DATA
+INSERT INTO CAMPAIGN VALUES(1,'Laundry Campaign','C01',1,'Persil','20-JAN-2020',NULL);
+
+--staff campaign data
+INSERT INTO STAFF_CAMPAIGN VALUES(1,1,1);
+INSERT INTO STAFF_CAMPAIGN VALUES(2,5,1);
+INSERT INTO STAFF_CAMPAIGN VALUES(3,6,1);
+INSERT INTO STAFF_CAMPAIGN VALUES(4,8,1);
+INSERT INTO STAFF_CAMPAIGN VALUES(5,9,1);
+INSERT INTO STAFF_CAMPAIGN VALUES(6,11,1);
+
+--MEETING DATA
+INSERT INTO MEETING VALUES(1,1,'20-JAN-2020 09:00:00','4.5 HOURS','Initial sitting and discussion','Delphi Office');
+INSERT INTO MEETING VALUES(2,1,'22-JAN-2020 10:00:00','5 HOURS','Placement strategy and discussion','Delphi Office');
+INSERT INTO MEETING VALUES(3,1,'25-JAN-2020 10:00:00','5 HOURS','Discussion on layout design','Unilever Office');
+INSERT INTO MEETING VALUES(4,1,'27-JAN-2020 11:00:00','4 HOURS','Graphics design plan','Unilever Office');
+
+--staff meeting data
+INSERT INTO STAFF_MEETING VALUES(1,1,1);
+INSERT INTO STAFF_MEETING VALUES(2,8,1);
+INSERT INTO STAFF_MEETING VALUES(3,9,1);
+INSERT INTO STAFF_MEETING VALUES(4,1,2);
+INSERT INTO STAFF_MEETING VALUES(5,8,2);
+INSERT INTO STAFF_MEETING VALUES(6,11,2);
+INSERT INTO STAFF_MEETING VALUES(7,1,3);
+INSERT INTO STAFF_MEETING VALUES(8,5,3);
+INSERT INTO STAFF_MEETING VALUES(9,9,3);
+INSERT INTO STAFF_MEETING VALUES(10,1,4);
+INSERT INTO STAFF_MEETING VALUES(11,5,4);
+INSERT INTO STAFF_MEETING VALUES(12,6,4);
+INSERT INTO STAFF_MEETING VALUES(13,9,4);
+
+
+--ADVERT DATA
+INSERT INTO ADVERT VALUES(1,'A01',1,'Newspaper','New laundry detergent, effective and quick to wash stains','Homemakers','1/2 page','23-FEB-2020',NULL);
+INSERT INTO ADVERT VALUES(2,'A02',1,'Television','New laundry detergent, effective and quick to wash stains, safe for use also','Homemakers','25 seconds broadcast','26-FEB-2020',NULL);
+INSERT INTO ADVERT VALUES(3,'A03',1,'Web','New laundry detergent, effective and quick to wash stains','Homemakers','20 seconds while playing songs on Youtube','26-FEB-2020',NULL);
+
+
+--component data
+INSERT INTO COMPONENT VALUES(1,1,'Text','Describe the effectiveness of the product','Ongoing','23-FEB-2020',NULL);
+INSERT INTO COMPONENT VALUES(2,1,'Photograph','Show the product photo','Not started',NULL,NULL);
+INSERT INTO COMPONENT VALUES(3,2,'Photograph','Design the product photo','Ongoing','26-FEB-2020',NULL);
+INSERT INTO COMPONENT VALUES(4,2,'Graphics','HD Graphics to make the add more good looking','Ongoing','26-FEB-2020',NULL);
+INSERT INTO COMPONENT VALUES(5,2,'Video','Assemble the photo and graphics and produce the video','Not started',NULL,NULL);
+INSERT INTO COMPONENT VALUES(6,3,'Photograph','Photo design with perfect layout and size','Ready','26-FEB-2020','03-MARCH-2020');
+INSERT INTO COMPONENT VALUES(7,3,'Video','Video design using photo and perfect animations','Ready','02-MARCH-2020','11-MARCH-2020');
+
+
+--PLACEMENT DATA
+INSERT INTO PLACEMENT VALUES(1,3,11,'PL1','Web','Stuart','02055548910',NULL,NULL,'Each 40 minutes',NULL,'Properly displayed with perfect frequency','14-MARCH-2020');
+INSERT INTO PLACEMENT VALUES(2,3,11,'PL2','Web','Ducket','02091148752',NULL,NULL,'Each 1 hour later',NULL,'Can increase the frequency','16-MARCH-2020');
+INSERT INTO PLACEMENT VALUES(3,3,11,'PL3','Web','Martha','02016722351',NULL,NULL,'After each 2 songs have been played',NULL,'Too fast, need to decrease the frequency','18-MARCH-2020');
+
+
+--QUERIES BEGIN FROM THIS POINT
+
+SELECT S.STAFF_ID,S.STAFF_NAME, S.STAFF_ROLE,S.CHARGE_OUT_RATE CHARGE_RATE_PER_HR_in_GBP,S.TELEPHONE_NO,S.FAX_NO,S.EMAIL_ID
+FROM STAFF S JOIN STAFF_CAMPAIGN SC
+ON S.STAFF_ID = SC.STAFF_ID
+WHERE SC.CAMPAIGN_ID =
+(
+    SELECT CAMPAIGN_ID
+    FROM CAMPAIGN
+    WHERE CAMPAIGN_CODE = 'C01'
+);
+
+
+SELECT M.DATE_AND_TIME, M.DURATION, M.PURPOSE, M.LOCATION,
+(
+    SELECT COUNT(*)
+    FROM STAFF_MEETING
+    WHERE MEETING_ID = M.MEETING_ID
+    GROUP  BY MEETING_ID
+) STAFFS
+FROM MEETING M
+WHERE M.CAMPAIGN_ID =
+(
+    SELECT CAMPAIGN_ID
+    FROM CAMPAIGN
+    WHERE CAMPAIGN_CODE = 'C01'
+);
+
+
+SELECT COMPONENT_ID, TYPE, REQUIREMENTS, STATUS, START_DATE, END_DATE
+FROM COMPONENT
+WHERE ADVERT_ID IN
+(
+    SELECT ADVERT_ID
+    FROM ADVERT
+    WHERE CAMPAIGN_ID = (SELECT CAMPAIGN_ID FROM CAMPAIGN WHERE CAMPAIGN_CODE = 'C01')
+)AND UPPER(STATUS) = 'ONGOING';
+
+SELECT ADVERT_CODE, ADVERT_TYPE, BRIEF_DESC, AUDIENCE, ADVERT_SIZE, START_DATE, END_DATE
+FROM ADVERT
+WHERE CAMPAIGN_ID =
+(
+    SELECT CAMPAIGN_ID
+    FROM CAMPAIGN
+    WHERE CAMPAIGN_CODE = 'C01'
+);
+
+SELECT P.PLACEMENT_CODE,A.ADVERT_CODE ,P.ASSISTANT_ID,S.STAFF_NAME ASSISTANT_NAME,P.PL_AGENCY_TYPE AGENCY_TYPE,P.CONTACT_NAME,P.CONTACT_PHONE,P.FREQUENCY,P.NOTE,P.PLACEMENT_DATE
+FROM PLACEMENT P JOIN ADVERT A 
+ON P.ADVERT_ID = A.ADVERT_ID
+JOIN STAFF S
+ON P.ASSISTANT_ID = S.STAFF_ID
+WHERE P.ADVERT_ID =
+(
+    SELECT ADVERT_ID
+    FROM ADVERT
+    WHERE ADVERT_CODE = 'A03'
+);
+
+SELECT S.STAFF_ID ID, S.STAFF_NAME NAME, SA.SALARY SALARY_IN_GBP, S.CHARGE_OUT_RATE_PER_HR_IN_GBP CHARGE_RATE,S.TELEPHONE_NO,S.EMAIL_ID,S.FAX_NO,
+(
+    SELECT COUNT(*)
+    FROM STAFF_CAMPAIGN
+    WHERE STAFF_ID = S.STAFF_ID
+    GROUP  BY CAMPAIGN_ID
+) NUMBER_OF_CAMPAIGNS
+FROM STAFF S JOIN SALARY SA
+ON S.SALARY_ID = SA.SALARY_ID
+WHERE UPPER(S.STAFF_ROLE) = 'CONTACT PERSON';
+

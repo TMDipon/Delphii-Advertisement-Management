@@ -1,0 +1,128 @@
+CREATE TABLE SALARY
+(
+    SALARY_ID NUMBER,
+    SALARY_GRADE VARCHAR2(20) not null,
+    SALARY NUMBER not null,
+    constraint salary_pk PRIMARY KEY(SALARY_ID)
+);
+
+CREATE TABLE STAFF
+(
+    STAFF_ID NUMBER,
+    STAFF_NAME VARCHAR2(50) not null,
+    SALARY_ID NUMBER not null,
+    STAFF_ROLE VARCHAR2(40) not null,
+    CHARGE_OUT_RATE NUMBER not null,
+    TELEPHONE_NO VARCHAR2(30) not null,
+    FAX_NO VARCHAR2(30) not null,
+    EMAIL_ID VARCHAR2(40) not null,
+    constraint staff_pk PRIMARY KEY(STAFF_ID),
+    constraint staff_fk_1 FOREIGN KEY(SALARY_ID) references SALARY(SALARY_ID) on delete cascade
+);
+
+CREATE TABLE CLIENT
+(
+    CLIENT_ID NUMBER,
+    COMPANY_NAME VARCHAR2(40)not null,
+    ACC_MANAGER_ID NUMBER not null,
+    constraint client_pk PRIMARY KEY(CLIENT_ID),
+    constraint client_fk_1 FOREIGN KEY(ACC_MANAGER_ID) references STAFF(STAFF_ID) on delete cascade
+);
+
+CREATE TABLE CAMPAIGN
+(
+    CAMPAIGN_ID NUMBER,
+    CAMPAIGN_NAME VARCHAR2(50) not null,
+    CAMPAIGN_CODE VARCHAR2(15) not null unique,
+    CLIENT_ID NUMBER not null,
+    CAMPAIGN_PRODUCT VARCHAR2(40) not null,
+    START_DATE DATE,
+    END_DATE DATE,
+    constraint campaign_pk PRIMARY KEY(CAMPAIGN_ID),
+    constraint campaign_fk_1 FOREIGN KEY(CLIENT_ID) references CLIENT(CLIENT_ID) on delete cascade,
+    constraint campaign_date_check CHECK(END_DATE > START_DATE)
+);
+
+CREATE TABLE MEETING
+(
+    MEETING_ID NUMBER,
+    CAMPAIGN_ID NUMBER not null,
+    DATE_and_TIME TIMESTAMP not null,
+    DURATION VARCHAR2(20) not null,
+    PURPOSE VARCHAR2(300) not null,
+    LOCATION VARCHAR2(100) not null,
+    constraint meeting_pk PRIMARY KEY(MEETING_ID),
+    constraint meeting_fk_1 FOREIGN KEY(CAMPAIGN_ID) references CAMPAIGN(CAMPAIGN_ID) on delete cascade
+);
+
+CREATE TABLE STAFF_CAMPAIGN
+(
+    STAFF_CAMPAIGN_ID NUMBER,
+    STAFF_ID NUMBER not null,
+    CAMPAIGN_ID NUMBER not null,
+    constraint staff_campaign_pk PRIMARY KEY(STAFF_CAMPAIGN_ID),
+    constraint staff_campaign_fk_1 FOREIGN KEY(STAFF_ID) references STAFF(STAFF_ID) on delete cascade,
+    constraint staff_campaign_fk_2 FOREIGN KEY(CAMPAIGN_ID) references CAMPAIGN(CAMPAIGN_ID) on delete cascade,
+    constraint staff_campaign_unique UNIQUE(STAFF_ID, CAMPAIGN_ID)
+);
+
+CREATE TABLE STAFF_MEETING
+(
+    STAFF_MEETING_ID NUMBER,
+    STAFF_ID NUMBER not null,
+    MEETING_ID NUMBER not null,
+    constraint staff_meeting_pk PRIMARY KEY(STAFF_MEETING_ID),
+    constraint staff_meeting_fk_1 FOREIGN KEY(STAFF_ID) references STAFF(STAFF_ID) on delete cascade,
+    constraint staff_meeting_fk_2 FOREIGN KEY(MEETING_ID) references MEETING(MEETING_ID) on delete cascade,
+    constraint staff_meeting_unique UNIQUE(STAFF_ID, MEETING_ID)
+);
+
+CREATE TABLE ADVERT
+(
+    ADVERT_ID NUMBER,
+    ADVERT_CODE VARCHAR2(15) not null unique,
+    CAMPAIGN_ID NUMBER not null,
+    ADVERT_TYPE VARCHAR2(20) not null,
+    BRIEF_DESC VARCHAR2(400) not null,
+    AUDIENCE VARCHAR2(300) not null,
+    ADVERT_SIZE VARCHAR2(300) not null,
+    START_DATE DATE,
+    END_DATE DATE,
+    constraint advert_pk PRIMARY KEY(ADVERT_ID),
+    constraint advert_check_date CHECK(END_DATE > START_DATE),
+    constraint advert_fk_1 FOREIGN KEY(CAMPAIGN_ID) references CAMPAIGN(CAMPAIGN_ID) on delete cascade
+);
+
+CREATE TABLE COMPONENT
+(
+    COMPONENT_ID NUMBER,
+    ADVERT_ID NUMBER not null,
+    TYPE VARCHAR2(100) not null,
+    REQUIREMENTS VARCHAR2(250) not null,
+    STATUS VARCHAR2(100) not null,
+    START_DATE DATE,
+    END_DATE DATE,
+    constraint component_pk PRIMARY KEY(COMPONENT_ID),
+    constraint component_fk_1 FOREIGN KEY(ADVERT_ID) references ADVERT(ADVERT_ID) on delete cascade,
+    constraint component_date_check CHECK(END_DATE > START_DATE)
+);
+
+CREATE TABLE PLACEMENT
+(
+    PLACEMENT_ID NUMBER,
+    ADVERT_ID NUMBER not null,
+    ASSISTANT_ID NUMBER not null,
+    PLACEMENT_CODE VARCHAR2(30) not null,
+    PL_AGENCY_TYPE VARCHAR2(100) not null,
+    CONTACT_NAME VARCHAR2(100) not null,
+    CONTACT_PHONE VARCHAR2(50) not null,
+    PAGES_PER_EDITION NUMBER,
+    NUMBER_OF_EDITION NUMBER,
+    FREQUENCY VARCHAR2(100),
+    NUMBER_OF_LOCATIONS NUMBER,
+    NOTE VARCHAR2(300),
+    PLACEMENT_DATE DATE,
+    constraint placement_pk PRIMARY KEY(PLACEMENT_ID),
+    constraint placement_fk_1 FOREIGN KEY(ADVERT_ID) references ADVERT(ADVERT_ID) on delete cascade,
+    constraint placement_fk_2 FOREIGN KEY(ASSISTANT_ID) references STAFF(STAFF_ID) on delete cascade
+);
